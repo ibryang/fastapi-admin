@@ -1,11 +1,8 @@
-import datetime
-
 from sqlalchemy import create_engine, Column, BigInteger, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, scoped_session, Session
+from sqlalchemy.orm import sessionmaker, scoped_session
 
 from application import config
-from schemas.system import UserInfo
 
 engine = create_engine(config.DB_CONN_URI, pool_pre_ping=True)
 # 创建连接工厂，关闭自动提交和自动刷新， 工厂（给它传值，它会返回一个结果给你）

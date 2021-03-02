@@ -5,15 +5,15 @@ from sqlalchemy.orm import Session
 
 from application.response import success, error
 from models.system import SysPost
-from schemas.system import UserInfo, PostForm
+from form.system import UserInfo, PostForm
 from utils.data_utils import orm_all_to_dict, orm_one_to_dict
 from utils.jwt_token import get_current_user
 from utils.routing import APIRouter
 
-router = APIRouter()
+router = APIRouter(tags=['岗位'])
 
 
-@router.get('/postlist')
+@router.get('/post-list/')
 async def get_post_list(request: Request, post_name: str = None, status: str = None, page: int = 1, page_size: int = 10):
     start = (page - 1) * page_size
     db: Session = request.state.db
@@ -38,7 +38,7 @@ async def get_post_by_id(request: Request, post_id: int):
     return success(data=orm_one_to_dict(db_query))
 
 
-@router.put("/post")
+@router.put("/post/")
 async def update_post(request: Request, form: PostForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     if db.query(SysPost).filter(SysPost.post_id == form.post_id).first() is None:
@@ -51,7 +51,7 @@ async def update_post(request: Request, form: PostForm, user_info: UserInfo = De
     return success(message='修改成功')
 
 
-@router.post("/post")
+@router.post("/post/")
 async def add_post(request: Request, form: PostForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     data = form.dict(exclude_none=True, exclude={"post_id"})

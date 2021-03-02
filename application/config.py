@@ -36,8 +36,8 @@ HTTP_404 = 404  # 系统报错
 
 # 系统设置
 NAME = 'ibry后台管理系统'
-LOGO = '/static/logo/logo.png'
-HEADER_IMG = '/static/logo/header.jpg'
+LOGO = 'http://127.0.0.1:8888/static/logo/logo.png'
+HEADER_IMG = 'http://127.0.0.1:8888/static/logo/header.jpg'
 
 '''token验证'''
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"

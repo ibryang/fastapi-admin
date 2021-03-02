@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from application.response import success, error
 from models.system import SysUser, SysDept, SysRole, SysPost, SysMenu, SysRoleMenu
-from schemas.system import UserInfo, UserForm
+from form.system import UserInfo, UserForm
 from utils.data_utils import orm_all_to_dict, orm_one_to_dict
 from utils.jwt_token import get_current_user
 from utils.routing import APIRouter
@@ -14,7 +14,7 @@ from utils.routing import APIRouter
 router = APIRouter(tags=["用户"])
 
 
-@router.get("/getinfo")
+@router.get("/getinfo/")
 async def get_info(request: Request, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     db_user: SysUser = db.query(SysUser.avatar, SysUser.dept_id, SysUser.nick_name,
@@ -59,7 +59,7 @@ async def get_info(request: Request, user_info: UserInfo = Depends(get_current_u
 #     return tuple(dept_ids)
 
 
-@router.get("/sysUserList")
+@router.get("/user-list/")
 async def get_user_list(request: Request, username: str = None, dept_id: int = None, phone: str = None, page: int = 1, page_size: int = 10):
     """
     获取用户列表≤
@@ -77,13 +77,13 @@ async def get_user_list(request: Request, username: str = None, dept_id: int = N
         db_user = db_user.filter(SysUser.phone.like('%' + phone + '%'))
     if username:
         db_user = db_user.filter(SysUser.username.like('%' + username + '%'))
-    total = db_user.count()
+    # total = db_user.count()
     db_user_list = db_user.limit(page_size).offset(start).all()
     user_list = orm_all_to_dict(db_user_list)
-    return success(data={'list': user_list, 'total': total})
+    return success(data={'list': user_list, 'total': 20})
 
 
-@router.get("/sysUser")
+@router.get("/role-post/")
 async def get_post_role(request: Request):
     db: Session = request.state.db
     db_post_list = db.query(SysPost).filter(SysPost.status == 2).all()
@@ -91,7 +91,7 @@ async def get_post_role(request: Request):
     return success(data={"roles": orm_all_to_dict(db_role_list), "posts": orm_all_to_dict(db_post_list)})
 
 
-@router.get("/sysUser/{user_id}")
+@router.get("/user/{user_id}")
 async def get_user_by_id(request: Request, user_id: int):
     db: Session = request.state.db
     db_user = db.query(SysUser.username, SysUser.user_id, SysUser.dept_id, SysUser.post_id, SysUser.sex, SysUser.role_id, SysUser.nick_name, SysUser.status,
@@ -105,7 +105,7 @@ async def get_user_by_id(request: Request, user_id: int):
     return success(data=orm_one_to_dict(db_user), roles=orm_all_to_dict(db_role_list), posts=orm_all_to_dict(db_post_list))
 
 
-@router.put("/sysUser")
+@router.put("/user/")
 async def update_user(request: Request, form: UserForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     res = db.query(SysUser.user_id).filter_by(user_id=form.user_id).first()
@@ -115,6 +115,10 @@ async def update_user(request: Request, form: UserForm, user_info: UserInfo = De
         data = form.dict(exclude_none=True, exclude={'username', 'password'})
     elif form.password == 'reset_user_pwd':
         data = {'password': '123456'}
+    elif form.status:
+        data = {"status": form.status}
+    else:
+        data = form.dict(exclude_none=True, exclude={'username', 'password', 'status'})
     data['updated_at'] = datetime.now()
     data['update_by'] = user_info.user_id
     db.query(SysUser.user_id).filter_by(user_id=form.user_id).update(data)
@@ -122,7 +126,7 @@ async def update_user(request: Request, form: UserForm, user_info: UserInfo = De
     return success(message='更新成功')
 
 
-@router.post("/sysUser")
+@router.post("/user/")
 async def add_user(request: Request, form: UserForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     if db.query(SysUser).filter_by(username=form.username).first():
@@ -137,7 +141,7 @@ async def add_user(request: Request, form: UserForm, user_info: UserInfo = Depen
     return success(message='创建成功')
 
 
-@router.delete("/sysUser/{user_ids}")
+@router.delete("/user/{user_ids}")
 async def delete_user(request: Request, user_ids: str, user_info: UserInfo = Depends(get_current_user)):
     user_ids = user_ids.split(",")
     db: Session = request.state.db

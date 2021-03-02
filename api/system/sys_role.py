@@ -5,15 +5,15 @@ from sqlalchemy.orm import Session
 
 from application.response import success, error
 from models.system import SysRole, SysRoleMenu, SysRoleDept
-from schemas.system import UserInfo, RoleDeptMenuForm
+from form.system import UserInfo, RoleDeptMenuForm
 from utils.data_utils import orm_all_to_dict, orm_one_to_dict
 from utils.jwt_token import get_current_user
 from utils.routing import APIRouter
 
-router = APIRouter()
+router = APIRouter(tags=['角色'])
 
 
-@router.get("/rolelist")
+@router.get("/role-list/")
 async def get_role_list(request: Request, page: int = 1, page_size: int = 10, role_name: str = None, role_key: str = None, status: str = None):
     """
     获取用户列表≤
@@ -30,9 +30,9 @@ async def get_role_list(request: Request, page: int = 1, page_size: int = 10, ro
         db_query = db_query.filter(SysRole.status == status)
     db_query = db_query.filter(SysRole.status.in_((1, 2))).order_by(SysRole.role_sort).limit(page_size).offset(start)
     total = db_query.count()
-    db_role_list = db_query.all()
-    role_list = orm_all_to_dict(db_role_list)
-    return success(data={'list': role_list, 'total': total})
+    db_query_list = db_query.all()
+    data_list = orm_all_to_dict(db_query_list)
+    return success(data={'list': data_list, 'total': total})
 
 
 @router.get('/role/{role_id}')
@@ -48,7 +48,7 @@ async def get_role_by_id(request: Request, role_id: int):
     return success(role=orm_one_to_dict(db_role), menus=role_menu_ids, depts=role_dept_ids)
 
 
-@router.put("/role")
+@router.put("/role/")
 async def save_role_menu(request: Request, form: RoleDeptMenuForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     if form.role:
@@ -78,7 +78,7 @@ async def save_role_menu(request: Request, form: RoleDeptMenuForm, user_info: Us
     return success(message='修改成功')
 
 
-@router.put('/roledatascope')
+@router.put('/role-data-scope/')
 async def update_role_data(request: Request, form: RoleDeptMenuForm, user_info: UserInfo = Depends(get_current_user)):
     if form.role.role_id is None:
         return error(message='角色不能为空')
@@ -101,7 +101,7 @@ async def update_role_data(request: Request, form: RoleDeptMenuForm, user_info: 
     return success(message='修改成功')
 
 
-@router.post("/role")
+@router.post("/role/")
 async def add_role(request: Request, form: RoleDeptMenuForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     role = form.role.dict(exclude_none=True, exclude={'role_id'})

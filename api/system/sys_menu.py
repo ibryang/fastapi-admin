@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from application.response import success, error
 from models.system import SysMenu, SysRoleMenu
-from schemas.system import UserInfo, MenuForm
+from form.system import UserInfo, MenuForm
 from utils.data_utils import orm_all_to_dict, get_tree_data_list, orm_one_to_dict
 from utils.jwt_token import get_current_user
 from utils.routing import APIRouter
@@ -14,7 +14,7 @@ from utils.routing import APIRouter
 router = APIRouter(tags=['菜单'])
 
 
-@router.get("/menurole")
+@router.get("/menu-role/")
 async def get_user_menu(request: Request, user: UserInfo = Depends(get_current_user)):
     """获取用户菜单权限"""
     db: Session = request.state.db
@@ -28,7 +28,7 @@ async def get_user_menu(request: Request, user: UserInfo = Depends(get_current_u
     return success(data=tree_menu_list)
 
 
-@router.get("/menulist")
+@router.get("/menu-list/")
 async def get_menu_list(request: Request, title: str = None, visible: str = None):
     """
     获取用户菜单权限
@@ -57,7 +57,7 @@ async def get_menu(request: Request, menu_id: int):
     return success(data=menu_info)
 
 
-@router.put("/menu")
+@router.put("/menu/")
 async def update_menu(request: Request, form: MenuForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     if db.query(SysMenu).filter(SysMenu.menu_id == form.menu_id).first() is None:
@@ -70,7 +70,7 @@ async def update_menu(request: Request, form: MenuForm, user_info: UserInfo = De
     return success(message='修改成功')
 
 
-@router.post("/menu")
+@router.post("/menu/")
 async def update_menu(request: Request, form: MenuForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     data = form.dict(exclude_none=True, exclude={'menu_id'})
@@ -90,8 +90,8 @@ async def delete_menu(request: Request, menu_id: str):
     return success(message='success')
 
 
-@router.get("/menuTreeselect")
-async def get_menu_treeselect(request: Request):
+@router.get("/menu-tree-select/")
+async def get_menu_tree_select(request: Request):
     db: Session = request.state.db
     db_menu_list = db.query(SysMenu.menu_id.label("id"), SysMenu.title.label('label'), SysMenu.parent_id).all()
     menu_tree_data = get_tree_data_list(orm_all_to_dict(db_menu_list))

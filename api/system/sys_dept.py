@@ -5,15 +5,15 @@ from sqlalchemy.orm import Session
 
 from application.response import success, error
 from models.system import SysDept
-from schemas.system import UserInfo, DeptForm
+from form.system import UserInfo, DeptForm
 from utils.data_utils import orm_all_to_dict, get_tree_data, get_tree_data_list, orm_one_to_dict
 from utils.jwt_token import get_current_user
 from utils.routing import APIRouter
 
-router = APIRouter()
+router = APIRouter(tags=['部门'])
 
 
-@router.get('/deptTree')
+@router.get('/dept-tree/')
 async def get_dept_tree(request: Request):
     """
     获取部门列表
@@ -25,15 +25,15 @@ async def get_dept_tree(request: Request):
     return success(data=tree_dept_list)
 
 
-@router.get('/deptTreeselect')
-async def get_dept_treeselect(request: Request):
+@router.get('/dept-tree-select/')
+async def get_dept_tree_select(request: Request):
     db: Session = request.state.db
     db_dept_list = db.query(SysDept.dept_id.label("id"), SysDept.dept_name.label("label"), SysDept.parent_id).all()
     dept_tree_data = get_tree_data_list(orm_all_to_dict(db_dept_list))
     return success(depts=dept_tree_data)
 
 
-@router.get("/deptList")
+@router.get("/dept-list/")
 async def get_dept_list(request: Request, dept_name: str = None, status: str = None):
     db: Session = request.state.db
     db_query = db.query(SysDept)
@@ -58,7 +58,7 @@ async def get_dept_by_id(request: Request, dept_id: int):
     return success(data=orm_one_to_dict(db_dept))
 
 
-@router.put("/dept")
+@router.put("/dept/")
 async def update_dept(request: Request, form: DeptForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     if db.query(SysDept).filter(SysDept.dept_id == form.dept_id).first() is None:
@@ -71,7 +71,7 @@ async def update_dept(request: Request, form: DeptForm, user_info: UserInfo = De
     return success(message='修改成功')
 
 
-@router.post("/dept")
+@router.post("/dept/")
 async def add_dept(request: Request, form: DeptForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     data = form.dict(exclude_none=True, exclude={"dept_id"})

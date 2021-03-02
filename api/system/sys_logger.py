@@ -6,10 +6,10 @@ from models.system import SysLoginLog, SysOperaLog
 from utils.data_utils import orm_all_to_dict
 from utils.routing import APIRouter
 
-router = APIRouter()
+router = APIRouter(tags=['日志'])
 
 
-@router.get('/sys-login-log')
+@router.get('/login-log/')
 async def get_login_log_list(request: Request, username: str = None, ipaddr: str = None, page: int = 1, page_size: int = 10):
     start = (page - 1) * page_size
     db: Session = request.state.db
@@ -24,7 +24,7 @@ async def get_login_log_list(request: Request, username: str = None, ipaddr: str
     return success(data={'list': data_list, 'total': total})
 
 
-@router.get('/sys-opera-log')
+@router.get('/opera-log/')
 async def get_opera_log_list(request: Request, title: str = None, page: int = 1, page_size: int = 10):
     start = (page - 1) * page_size
     db: Session = request.state.db
