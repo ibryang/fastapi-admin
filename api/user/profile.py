@@ -38,14 +38,14 @@ def login(request: Request, form: OAuth2PasswordRequestForm = Depends()):
     return success(access_token=token, user=dict_user)
 
 
-@router.post("/api/logout/")
+@router.post("/logout/")
 def logout(user_info: UserInfo = Depends(get_current_user)):
     # TODO 做redis清除token操作
     token = user_info.token
     return success(message='退出成功')
 
 
-@router.get("/api/user/profile/")
+@router.get("/user/profile/")
 async def get_user_profile(request: Request, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     db_user = db.query(SysUser.username, SysUser.user_id, SysUser.dept_id, SysUser.post_id, SysUser.sex, SysUser.role_id, SysUser.nick_name, SysUser.status,
@@ -57,7 +57,7 @@ async def get_user_profile(request: Request, user_info: UserInfo = Depends(get_c
     return success(data=orm_one_to_dict(db_user))
 
 
-@router.put("/api/user/pwd/")
+@router.put("/user/pwd/")
 async def update_user_password(request: Request, form: PasswordForm, user_info: UserInfo = Depends(get_current_user)):
     db: Session = request.state.db
     if form.new_password1 != form.new_password2:
@@ -72,7 +72,7 @@ async def update_user_password(request: Request, form: PasswordForm, user_info: 
     return success(message="修改成功")
 
 
-@router.post('/api/user/avatar/', name="上传头像")
+@router.post('/user/avatar/', name="上传头像")
 async def upload_avatar(request: Request, user_info: UserInfo = Depends(get_current_user),
                         file: UploadFile = File(...)):
     if (file.spool_max_size / 1024 / 1024 / 1024) > 0.5:
